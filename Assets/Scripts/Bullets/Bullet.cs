@@ -3,22 +3,12 @@ using UnityEngine;
 
 namespace ShootEmUp
 {
-    public struct BulletData
-    {
-        public Vector2 position;
-        public Vector2 velocity;
-        public Color color;
-        public PhysicsLayer physicsLayer;
-        public int damage;
-        public bool isPlayer;
-    }
-
     public sealed class Bullet : MonoBehaviour
     {
         public event Action<Bullet, Collision2D> OnCollisionEntered;
 
-        [NonSerialized] public Boolean _isPlayer;
-        [NonSerialized] public int _damage;
+        public Boolean IsPlayer { get; private set; }
+        public Int32 Damage { get; private set; }
 
         [SerializeField]
         private Rigidbody2D _rigidbody2D;
@@ -28,37 +18,37 @@ namespace ShootEmUp
 
         private void OnCollisionEnter2D(Collision2D collision)
         {
-            this.OnCollisionEntered?.Invoke(this, collision);
+            OnCollisionEntered?.Invoke(this, collision);
         }
 
         private void SetVelocity(Vector2 velocity)
         {
-            this._rigidbody2D.velocity = velocity;
+            _rigidbody2D.velocity = velocity;
         }
 
         private void SetPhysicsLayer(PhysicsLayer physicsLayer)
         {
-            this.gameObject.layer = (Int32) physicsLayer;
+            gameObject.layer = (Int32) physicsLayer;
         }
 
         private void SetPosition(Vector3 position)
         {
-            this.transform.position = position;
+            transform.position = position;
         }
 
         private void SetColor(Color color)
         {
-            this._spriteRenderer.color = color;
+            _spriteRenderer.color = color;
         }
 
         public void BulletSetup(BulletData bulletData)
         {
-            SetPosition(bulletData.position);
-            SetColor(bulletData.color);
-            SetPhysicsLayer(bulletData.physicsLayer);
-            _damage = bulletData.damage;
-            _isPlayer = bulletData.isPlayer;
-            SetVelocity(bulletData.velocity);
+            SetPosition(bulletData.Position);
+            SetColor(bulletData.Color);
+            SetPhysicsLayer(bulletData.PhysicsLayer);
+            Damage = bulletData.Damage;
+            IsPlayer = bulletData.IsPlayer;
+            SetVelocity(bulletData.Velocity);
         }
     }
 }

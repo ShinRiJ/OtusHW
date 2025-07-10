@@ -3,32 +3,28 @@ using UnityEngine;
 
 namespace ShootEmUp
 {
-    public interface ILevelBoundCheck
-    {
-        public Boolean InBounds(Vector3 position);
-    }
     public sealed class LevelBounds : MonoBehaviour, ILevelBoundCheck
     {
         [SerializeField]
-        private Transform leftBorder;
+        private Transform _leftBorder;
 
         [SerializeField]
-        private Transform rightBorder;
+        private Transform _rightBorder;
 
         [SerializeField]
-        private Transform downBorder;
+        private Transform _downBorder;
 
         [SerializeField]
-        private Transform topBorder;
+        private Transform _topBorder;
         
         public Boolean InBounds(Vector3 position)
         {
             var positionX = position.x;
             var positionY = position.y;
-            return positionX > this.leftBorder.position.x
-                   && positionX < this.rightBorder.position.x
-                   && positionY > this.downBorder.position.y
-                   && positionY < this.topBorder.position.y;
+            return positionX > _leftBorder.position.x
+                   && positionX < _rightBorder.position.x
+                   && positionY > _downBorder.position.y
+                   && positionY < _topBorder.position.y;
         }
     }
 }

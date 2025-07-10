@@ -4,42 +4,53 @@ using UnityEngine;
 
 namespace ShootEmUp
 {
-    public interface ICharacterFireRequest
-    {
-        public void FireRequest();
-    }
-
-    public class CharacterFireController : MonoBehaviour, ICharacterFireRequest
+    public sealed class CharacterFireController : MonoBehaviour, ICharacterFireRequest
     {
         [SerializeField] private SerializableInterface<IWeaponComponent> _weaponComponent;
         [SerializeField] private SerializableInterface<IBulletLaucnher> _bulletSystem;
+        [SerializeField] private SerializableInterface<IInputManager> _inputManager;
 
         [SerializeField] private BulletConfig _bulletConfig;
 
         private Boolean _fireRequired;
 
-        private void FixedUpdate() => this.TryFire();
+        private void Start()
+        {
+            _inputManager.Value.OnFireAction += FireRequest;
+        }
+
+        private void FixedUpdate()
+        {
+            TryFire();
+        }
+
         private void TryFire()
         {
-            if (this._fireRequired == false) return;
+            if (_fireRequired == false)
+            {
+                return;
+            }
 
-            this._fireRequired = false;
-            this.OnFlyBullet();
+            _fireRequired = false;
+            OnFlyBullet();
         }
 
         private void OnFlyBullet()
         {
             _bulletSystem.Value.FlyBulletByArgs(new BulletData
             {
-                isPlayer = true,
-                physicsLayer = this._bulletConfig.physicsLayer,
-                color = this._bulletConfig.color,
-                damage = this._bulletConfig.damage,
-                position = _weaponComponent.Value.GetShootingPosition(),
-                velocity = _weaponComponent.Value.GetShootingVelocity(Vector3.up, this._bulletConfig.speed)
+                IsPlayer = true,
+                PhysicsLayer = _bulletConfig.physicsLayer,
+                Color = _bulletConfig.color,
+                Damage = _bulletConfig.damage,
+                Position = _weaponComponent.Value.GetShootingPosition(),
+                Velocity = _weaponComponent.Value.GetShootingVelocity(Vector3.up, _bulletConfig.speed)
             });
         }
 
-        public void FireRequest() => _fireRequired = true;
+        public void FireRequest()
+        {
+            _fireRequired = true;
+        }
     }
 }

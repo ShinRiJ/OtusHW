@@ -7,9 +7,20 @@ namespace ShootEmUp
     {
         [SerializeField] private SerializableInterface<ICharacterDeathNotifier> _characterControllerNotifier;
 
-        private void OnEnable() => _characterControllerNotifier.Value.OnCharacterDeath += HandleCharacterDeath;
-        private void OnDisable() => _characterControllerNotifier.Value.OnCharacterDeath -= HandleCharacterDeath;
-        private void HandleCharacterDeath(CharacterStateController controller) => FinishGame();
+        private void OnEnable()
+        {
+            _characterControllerNotifier.Value.OnCharacterDeath += HandleCharacterDeath;
+        }
+
+        private void OnDisable()
+        {
+            _characterControllerNotifier.Value.OnCharacterDeath -= HandleCharacterDeath;
+        }
+
+        private void HandleCharacterDeath(CharacterStateController controller)
+        {
+            FinishGame();
+        }
 
         public void FinishGame()
         {

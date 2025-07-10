@@ -1,80 +1,82 @@
+using System;
 using System.Collections.Generic;
 using TNRD;
 using UnityEngine;
 
 namespace ShootEmUp
 {
-    public interface IBulletLaucnher
-    {
-        public void FlyBulletByArgs(BulletData args);
-    }
-
     public sealed class BulletSystem : MonoBehaviour, IBulletLaucnher
     {
         [SerializeField]
-        private int initialCount = 75;
+        private Int32 _initialCount = 75;
         
         [SerializeField] private Transform _poolBulletContainer;
         [SerializeField] private Bullet _bulletPrefab;
         [SerializeField] private Transform _worldTransform;
         [SerializeField] private SerializableInterface<ILevelBoundCheck> _levelBoundsChecker;
 
-        private readonly Queue<Bullet> m_bulletPool = new();
-        private readonly HashSet<Bullet> m_activeBullets = new();
-        private readonly List<Bullet> m_activeBulletsFrameCache = new();
+        private readonly Queue<Bullet> _bulletPool = new();
+        private readonly HashSet<Bullet> _activeBullets = new();
+        private readonly List<Bullet> _activeBulletsFrameCache = new();
         
         private void Awake()
         {
-            for (var i = 0; i < this.initialCount; i++)
+            for (var i = 0; i < _initialCount; i++)
             {
-                var bullet = Instantiate(this._bulletPrefab, this._poolBulletContainer);
-                this.m_bulletPool.Enqueue(bullet);
+                var bullet = Instantiate(_bulletPrefab, _poolBulletContainer);
+                _bulletPool.Enqueue(bullet);
             }
         }
         
         private void FixedUpdate()
         {
-            this.m_activeBulletsFrameCache.Clear();
-            this.m_activeBulletsFrameCache.AddRange(this.m_activeBullets);
+            _activeBulletsFrameCache.Clear();
+            _activeBulletsFrameCache.AddRange(_activeBullets);
 
-            for (int i = 0, count = this.m_activeBulletsFrameCache.Count; i < count; i++)
+            for (int i = 0, count = _activeBulletsFrameCache.Count; i < count; i++)
             {
-                var bullet = this.m_activeBulletsFrameCache[i];
+                var bullet = _activeBulletsFrameCache[i];
 
-                if (!this._levelBoundsChecker.Value.InBounds(bullet.transform.position))
-                    this.BulletEndLife(bullet);
+                if (!_levelBoundsChecker.Value.InBounds(bullet.transform.position))
+                {
+                    BulletEndLife(bullet);
+                }
             }
         }
 
         public void FlyBulletByArgs(BulletData args)
         {
-            if (this.m_bulletPool.TryDequeue(out var bullet))
-                bullet.transform.SetParent(this._worldTransform);
+            if (_bulletPool.TryDequeue(out var bullet))
+            {
+                bullet.transform.SetParent(_worldTransform);
+            }
             else
             {
-                bullet = Instantiate(this._bulletPrefab, this._worldTransform);
+                bullet = Instantiate(_bulletPrefab, _worldTransform);
                 Debug.LogWarning("Bullet pull empty!");
             }
 
             bullet.BulletSetup(args);
 
-            if (this.m_activeBullets.Add(bullet))
-                bullet.OnCollisionEntered += this.OnBulletCollision;
+            if (_activeBullets.Add(bullet))
+            {
+                bullet.OnCollisionEntered += OnBulletCollision;
+            }
         }
         
         private void OnBulletCollision(Bullet bullet, Collision2D collision)
         {
-             BulletUtils.TryDealDamage(bullet, collision.gameObject);
-            this.BulletEndLife(bullet);
+            BulletUtils.TryDealDamage(bullet, collision.gameObject);
+            BulletEndLife(bullet);
         }
 
         private void BulletEndLife(Bullet bullet)
         {
-            if (this.m_activeBullets.Remove(bullet))
+            if (_activeBullets.Remove(bullet))
             {
-                bullet.OnCollisionEntered -= this.OnBulletCollision;
-                bullet.transform.SetParent(this._poolBulletContainer);
-                this.m_bulletPool.Enqueue(bullet);
+                bullet.OnCollisionEntered -= OnBulletCollision;
+                bullet.transform.SetParent(_poolBulletContainer);
+                _bulletPool.Enqueue(bullet);
             }
         }
     }

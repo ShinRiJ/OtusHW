@@ -6,12 +6,7 @@ using UnityEngine;
 
 namespace ShootEmUp
 {
-    public interface IIEnemyInitializer
-    {
-        public GameObject TrySpawnEnemy(GameObject enemy);
-    }
-
-    public class EnemySpawner : MonoBehaviour, IIEnemyInitializer
+    public sealed class EnemySpawner : MonoBehaviour, IIEnemyInitializer
     {
         [Header("Spawn")]
         [SerializeField]
@@ -23,27 +18,25 @@ namespace ShootEmUp
         [SerializeField]
         private Transform _worldTransform;
 
-        public GameObject TrySpawnEnemy(GameObject enemy)
+        public GameObject TrySpawnEnemy(EnemyComponentProvider enemyComponentProvider)
         {
-            EnemyComponentProvider enemyComponentProvider = enemy.GetComponent<EnemyComponentProvider>();
-
             if (enemyComponentProvider == null)
             {
                 Debug.LogError("!!! SpawnerError !!!");
                 return null;
             }
 
-            enemy.transform.SetParent(this._worldTransform);
+            enemyComponentProvider.transform.SetParent(_worldTransform);
 
-            var spawnPosition = this._enemyPositionsGetter.Value.RandomSpawnPosition();
-            enemy.transform.position = spawnPosition.position;
+            var spawnPosition = _enemyPositionsGetter.Value.RandomSpawnPosition();
+            enemyComponentProvider.transform.position = spawnPosition.position;
 
-            var attackPosition = this._enemyPositionsGetter.Value.RandomAttackPosition();
+            var attackPosition = _enemyPositionsGetter.Value.RandomAttackPosition();
 
             enemyComponentProvider.EnemyMoveAgentInstance.SetDestination(attackPosition.position);
-            enemyComponentProvider.EnemyAttackAgentInstance.SetTarget(this._target);
+            enemyComponentProvider.EnemyAttackAgentInstance.SetTarget(_target);
 
-            return enemy;
+            return enemyComponentProvider.gameObject;
         }
     }
 }

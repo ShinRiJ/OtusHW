@@ -5,14 +5,11 @@ using UnityEngine.InputSystem;
 
 namespace ShootEmUp
 {
-    public sealed class InputManager : MonoBehaviour
+    public sealed class InputManager : MonoBehaviour, IInputManager
     {
-        public float HorizontalDirection { get; private set; }
+        public float MoveDirection { get; private set; }
+        public event Action OnFireAction;
 
-        [SerializeField] private GameObject _character;
-        [SerializeField] private SerializableInterface<ICharacterFireRequest> characterController;
-
-        private IMoveComponent _moveCharacter;
         private PlayerInputActions _inputActions;
 
         private void Awake()
@@ -32,24 +29,14 @@ namespace ShootEmUp
             _inputActions.Disable();
         }
 
-        private void Start()
-        {
-            _moveCharacter = _character.GetComponent<IMoveComponent>();
-        }
-
         private void Update()
         {
-            HorizontalDirection = _inputActions.BaseMap.PlayerMove.ReadValue<Single>();
-        }
-
-        private void FixedUpdate()
-        {
-            this._moveCharacter.MoveByRigidbodyVelocity(new Vector2(this.HorizontalDirection, 0) * Time.fixedDeltaTime);
+            MoveDirection = _inputActions.BaseMap.PlayerMove.ReadValue<Single>();
         }
 
         private void OnFire(InputAction.CallbackContext context)
         {
-            characterController.Value?.FireRequest();
+            OnFireAction?.Invoke();
         }
     }
 }
