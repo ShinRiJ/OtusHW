@@ -40,11 +40,11 @@ namespace ShootEmUp
             _bulletSystem.Value.FlyBulletByArgs(new BulletData
             {
                 IsPlayer = true,
-                PhysicsLayer = _bulletConfig.physicsLayer,
-                Color = _bulletConfig.color,
-                Damage = _bulletConfig.damage,
+                PhysicsLayer = _bulletConfig.PhysicsLayer,
+                Color = _bulletConfig.Color,
+                Damage = _bulletConfig.Damage,
                 Position = _weaponComponent.Value.GetShootingPosition(),
-                Velocity = _weaponComponent.Value.GetShootingVelocity(Vector3.up, _bulletConfig.speed)
+                Velocity = _weaponComponent.Value.GetShootingVelocity(Vector3.up, _bulletConfig.Speed)
             });
         }
 

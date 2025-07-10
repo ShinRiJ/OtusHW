@@ -32,7 +32,7 @@ namespace ShootEmUp
             
             var vector = _destinationPoint - (Vector2) transform.position;
 
-            if (vector.magnitude <= 0.25f)
+            if (vector.magnitude <= _arrivalDistanceTreshold)
             {
                 _isReached = true;
                 return;

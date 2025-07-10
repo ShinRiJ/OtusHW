@@ -7,21 +7,18 @@ namespace ShootEmUp
         menuName = "Bullets/New BulletConfig"
     )]
 
-    //ѕрокл€тый класс
-    //ѕри измененении названи€ полей этого класса пули станов€тьс€ невидимыми
-
     public sealed class BulletConfig : ScriptableObject
     {
         [SerializeField]
-        public PhysicsLayer physicsLayer;
+        public PhysicsLayer PhysicsLayer;
 
         [SerializeField]
-        public Color color;
+        public Color Color;
 
         [SerializeField]
-        public int damage;
+        public int Damage;
 
         [SerializeField]
-        public float speed;
+        public float Speed;
     }
 }

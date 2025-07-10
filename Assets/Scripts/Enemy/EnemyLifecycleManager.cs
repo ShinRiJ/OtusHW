@@ -58,11 +58,11 @@ namespace ShootEmUp
             _bulletSystem.Value.FlyBulletByArgs(new BulletData
             {
                 IsPlayer = false,
-                PhysicsLayer = _bulletConfig.physicsLayer,
-                Color = _bulletConfig.color,
-                Damage = _bulletConfig.damage,
+                PhysicsLayer = _bulletConfig.PhysicsLayer,
+                Color = _bulletConfig.Color,
+                Damage = _bulletConfig.Damage,
                 Position = position,
-                Velocity = direction * _bulletConfig.speed
+                Velocity = direction * _bulletConfig.Speed
             });
         }
     }
