@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using ShootEmUp;
 using TNRD;
 using UnityEngine;
 
@@ -17,6 +14,8 @@ namespace ShootEmUp
 
         [SerializeField]
         private Transform _worldTransform;
+        
+
 
         public GameObject TrySpawnEnemy(EnemyComponentProvider enemyComponentProvider)
         {

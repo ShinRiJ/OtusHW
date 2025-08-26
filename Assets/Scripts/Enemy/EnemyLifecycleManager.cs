@@ -1,12 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using TNRD;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 
 namespace ShootEmUp
 {
-    public sealed class EnemyLifecycleManager : MonoBehaviour
+    public sealed class EnemyLifecycleManager : MonoBehaviour, IStartGameListener, IFinishGameListener, IResumeGameListener, IPauseGameListener
     {
         [SerializeField] private SerializableInterface<IEnemyPool> _enemyPool;
         [SerializeField] private SerializableInterface<IBulletLaucnher> _bulletSystem;
@@ -14,12 +17,42 @@ namespace ShootEmUp
         [SerializeField] private Single _cyclePeriod = 1;
         
         private readonly HashSet<GameObject> _activeEnemies = new();
+        private CancellationTokenSource _cts;
+        private Boolean _isPaused = false;
 
-        private IEnumerator Start()
+        public void StartGame()
         {
-            while (true)
+            if(_isPaused)
             {
-                yield return new WaitForSeconds(_cyclePeriod);
+                _isPaused = false;
+            }
+
+            _cts = new CancellationTokenSource();
+            SpawnCycle(_cts.Token).Forget();
+
+            ClearEnemies();
+        }
+
+        public void FinishGame()
+        {
+            _cts?.Cancel();
+            _cts?.Dispose();
+            _cts = null;
+        }
+
+        private async UniTaskVoid SpawnCycle(CancellationToken token)
+        {
+            while (!token.IsCancellationRequested)
+            {
+                await UniTask.WaitUntil(() => !_isPaused);
+                await UniTask.Delay(TimeSpan.FromSeconds(_cyclePeriod), cancellationToken: token);
+
+                if(_isPaused)
+                {
+                    await UniTask.WaitUntil(() => !_isPaused);
+                    await UniTask.Delay(TimeSpan.FromSeconds(_cyclePeriod), cancellationToken: token);
+                }
+
                 var enemy = _enemyPool.Value.TryGetNewEnemy();
                 if (enemy != null)
                 {
@@ -37,19 +70,42 @@ namespace ShootEmUp
             }
         }
 
+        private void ClearEnemies()
+        {
+            if(_activeEnemies.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var enemy in _activeEnemies)
+            {
+                if (enemy == null) continue;
+
+                RemoveEnemyFromGame(enemy);
+
+                _enemyPool.Value.RemoveEnemy(enemy);
+            }
+
+            _activeEnemies.Clear();
+        }
+
         private void OnDestroyed(GameObject enemy)
         {
             if (_activeEnemies.Remove(enemy))
             {
-                EnemyComponentProvider tempEnemy = enemy.GetComponent<EnemyComponentProvider>();
-
-                if (tempEnemy != null)
-                {
-                    tempEnemy.HitPointInstance.OnHPEmpty -= OnDestroyed;
-                    tempEnemy.EnemyAttackAgentInstance.OnFire -= OnFire;
-                }
-
+                RemoveEnemyFromGame(enemy);
                 _enemyPool.Value.RemoveEnemy(enemy);
+            }
+        }
+
+        private void RemoveEnemyFromGame(GameObject enemy)
+        {
+            EnemyComponentProvider tempEnemy = enemy.GetComponent<EnemyComponentProvider>();
+
+            if (tempEnemy != null)
+            {
+                tempEnemy.HitPointInstance.OnHPEmpty -= OnDestroyed;
+                tempEnemy.EnemyAttackAgentInstance.OnFire -= OnFire;
             }
         }
 
@@ -64,6 +120,16 @@ namespace ShootEmUp
                 Position = position,
                 Velocity = direction * _bulletConfig.Speed
             });
+        }
+
+        public void ResumeGame()
+        {
+            _isPaused = false;
+        }
+
+        public void PauseGame()
+        {
+            _isPaused = true;
         }
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 
 namespace ShootEmUp
 {
-    public sealed class InputManager : MonoBehaviour, IInputManager
+    public sealed class InputManager : MonoBehaviour, IStartGameListener, IFinishGameListener, IInputManager, ICommonTickable
     {
         public float MoveDirection { get; private set; }
         public event Action OnFireAction;
@@ -17,19 +17,19 @@ namespace ShootEmUp
             _inputActions = new PlayerInputActions();
         }
 
-        private void OnEnable()
+        public void StartGame()
         {
             _inputActions.Enable();
             _inputActions.BaseMap.Fire.performed += OnFire;
         }
 
-        private void OnDisable()
+        public void FinishGame()
         {
             _inputActions.BaseMap.Fire.performed -= OnFire;
             _inputActions.Disable();
         }
 
-        private void Update()
+        public void Tick()
         {
             MoveDirection = _inputActions.BaseMap.PlayerMove.ReadValue<Single>();
         }

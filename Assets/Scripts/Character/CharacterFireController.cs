@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ShootEmUp
 {
-    public sealed class CharacterFireController : MonoBehaviour, ICharacterFireRequest
+    public sealed class CharacterFireController : MonoBehaviour, ICharacterFireRequest, IStartGameListener, IFinishGameListener, IFixedTickable
     {
         [SerializeField] private SerializableInterface<IWeaponComponent> _weaponComponent;
         [SerializeField] private SerializableInterface<IBulletLaucnher> _bulletSystem;
@@ -14,12 +14,17 @@ namespace ShootEmUp
 
         private Boolean _fireRequired;
 
-        private void Start()
+        public void StartGame()
         {
             _inputManager.Value.OnFireAction += FireRequest;
         }
 
-        private void FixedUpdate()
+        public void FinishGame()
+        {
+            _inputManager.Value.OnFireAction -= FireRequest;
+        }
+
+        public void FixedTick()
         {
             TryFire();
         }
@@ -52,5 +57,6 @@ namespace ShootEmUp
         {
             _fireRequired = true;
         }
+
     }
 }

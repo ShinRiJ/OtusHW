@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ShootEmUp
 {
-    public sealed class Bullet : MonoBehaviour
+    public sealed class Bullet : MonoBehaviour, IPauseGameListener, IResumeGameListener
     {
         public event Action<Bullet, Collision2D> OnCollisionEntered;
 
@@ -15,6 +15,8 @@ namespace ShootEmUp
 
         [SerializeField]
         private SpriteRenderer _spriteRenderer;
+
+        private Vector2 _savedVelocity;
 
         private void OnCollisionEnter2D(Collision2D collision)
         {
@@ -49,6 +51,17 @@ namespace ShootEmUp
             Damage = bulletData.Damage;
             IsPlayer = bulletData.IsPlayer;
             SetVelocity(bulletData.Velocity);
+        }
+
+        public void ResumeGame()
+        {
+            _rigidbody2D.velocity = _savedVelocity;
+        }
+
+        public void PauseGame()
+        {
+            _savedVelocity = _rigidbody2D.velocity;
+            _rigidbody2D.velocity = Vector2.zero;
         }
     }
 }

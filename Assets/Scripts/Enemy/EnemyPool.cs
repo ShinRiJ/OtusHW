@@ -16,6 +16,9 @@ namespace ShootEmUp
         [SerializeField] private GameObject _enemyPrefab;
         [SerializeField] private Int32 _poolSize = 7;
 
+        [SerializeField]
+        private SerializableInterface<IEnemyUpdateInstaller> _enemyUpdateInstaller;
+
         private readonly Queue<GameObject> _enemyPool = new();
         
         private void Awake()
@@ -31,6 +34,8 @@ namespace ShootEmUp
         {
             enemy.transform.SetParent(_poolContainer);
             _enemyPool.Enqueue(enemy);
+
+            _enemyUpdateInstaller.Value.DeleteEnemyTicker(enemy.GetComponent<EnemyComponentProvider>());
         }
 
         public GameObject TryGetNewEnemy()
@@ -42,6 +47,10 @@ namespace ShootEmUp
             else
             {
                 EnemyComponentProvider newEnemy = enemy.GetComponent<EnemyComponentProvider>();
+                GameObject newEnemyObj = _enemySpawner.Value.TrySpawnEnemy(newEnemy);
+                
+                if(newEnemyObj != null)
+                    _enemyUpdateInstaller.Value.RegisterEnemyTicker(newEnemy);
                 return _enemySpawner.Value.TrySpawnEnemy(newEnemy);
             }
         }

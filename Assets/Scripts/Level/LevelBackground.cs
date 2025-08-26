@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ShootEmUp
 {
-    public sealed class LevelBackground : MonoBehaviour
+    public sealed class LevelBackground : MonoBehaviour, IFixedTickable
     {
         private float _startPositionY;
 
@@ -31,7 +31,7 @@ namespace ShootEmUp
             _positionZ = position.z;
         }
 
-        private void FixedUpdate()
+        public void FixedTick()
         {
             if (_myTransform.position.y <= _endPositionY)
             {

@@ -4,12 +4,12 @@ using UnityEngine.EventSystems;
 
 namespace ShootEmUp
 {
-    public sealed class CharacterMoveController : MonoBehaviour
+    public sealed class CharacterMoveController : MonoBehaviour, IFixedTickable
     {
         [SerializeField] private SerializableInterface<IInputManager> _inputManager;
         [SerializeField] private SerializableInterface<IMoveComponent> _moveComponent;
 
-        private void FixedUpdate()
+        public void FixedTick()
         {
             _moveComponent.Value.MoveByRigidbodyVelocity(
                 new Vector2(_inputManager.Value.MoveDirection, 0) * Time.fixedDeltaTime

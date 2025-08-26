@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ShootEmUp
 {
-    public sealed class HitPointsComponent : MonoBehaviour, IHitPointEndNotifier, IHitPointDamageRecieve
+    public sealed class HitPointsComponent : MonoBehaviour, IHitPointEndNotifier, IHitPointDamageRecieve, IHitPointInitRestore
     {
         public event Action<GameObject> OnHPEmpty;
         
@@ -22,6 +22,11 @@ namespace ShootEmUp
             {
                 OnHPEmpty?.Invoke(gameObject);
             }
+        }
+
+        public void InitRestoreHealth(int value)
+        {
+            _hitPoints = value;
         }
     }
 }

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ShootEmUp
 {
-    public sealed class EnemyMoveAgent : MonoBehaviour, IEnemyMoveAgent
+    public sealed class EnemyMoveAgent : MonoBehaviour, IEnemyMoveAgent, IFixedTickable
     {
         [SerializeField] private SerializableInterface<IMoveComponent> _moveComponent;
         [SerializeField] private Single _arrivalDistanceTreshold = 0.25f;
@@ -23,7 +23,7 @@ namespace ShootEmUp
             return _isReached;
         }
 
-        private void FixedUpdate()
+        public void FixedTick()
         {
             if (_isReached)
             {

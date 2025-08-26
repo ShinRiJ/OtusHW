@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace ShootEmUp
@@ -11,5 +12,10 @@ namespace ShootEmUp
         public IHitPointEndNotifier HitPointInstance => _hitPointInstance;
         public IEnemyMoveAgent EnemyMoveAgentInstance => _enemyMoveAgentInstance;
         public IEnemyAttackConfigure EnemyAttackAgentInstance => _enemyAttackAgentInstance;
+
+        public ITickable[] GetTickableComponets()
+        {
+            return GetComponents<ITickable>();
+        }
     }
 }

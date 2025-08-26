@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ShootEmUp
 {
-    public sealed class EnemyAttackAgent : MonoBehaviour, IEnemyAttackConfigure
+    public sealed class EnemyAttackAgent : MonoBehaviour, IEnemyAttackConfigure, IFixedTickable
     {
         public event Action<GameObject, Vector2, Vector2, IWeaponComponent> OnFire;
 
@@ -25,7 +25,7 @@ namespace ShootEmUp
             _currentTime = _countdown;
         }
 
-        private void FixedUpdate()
+        public void FixedTick()
         {
             if (!_moveAgent.Value.IsReached())
             {
