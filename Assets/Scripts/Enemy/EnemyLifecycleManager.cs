@@ -5,12 +5,13 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using TNRD;
 using UnityEngine;
-using static UnityEngine.EventSystems.EventTrigger;
-
+using Zenject;
 namespace ShootEmUp
 {
-    public sealed class EnemyLifecycleManager : MonoBehaviour, IStartGameListener, IFinishGameListener, IResumeGameListener, IPauseGameListener
+    public sealed class EnemyLifecycleManager : MonoBehaviour, IInitializable, IDisposable
     {
+        [Inject] private SignalBus _signulBusl; 
+
         [SerializeField] private SerializableInterface<IEnemyPool> _enemyPool;
         [SerializeField] private SerializableInterface<IBulletLaucnher> _bulletSystem;
         [SerializeField] private BulletConfig _bulletConfig;
@@ -20,7 +21,24 @@ namespace ShootEmUp
         private CancellationTokenSource _cts;
         private Boolean _isPaused = false;
 
-        public void StartGame()
+        public void Initialize()
+        {
+            _signulBusl.Subscribe<StartGameSignal>(OnStartGame);
+            _signulBusl.Subscribe<FinishGameSignal>(OnFinishGame);
+            _signulBusl.Subscribe<ResumeGameSignal>(OnResumeGame);
+            _signulBusl.Subscribe<PauseGameSignal>(OnPauseGame);
+
+        }
+
+        public void Dispose()
+        {
+            _signulBusl.Unsubscribe<StartGameSignal>(OnStartGame);
+            _signulBusl.Unsubscribe<FinishGameSignal>(OnFinishGame);
+            _signulBusl.Unsubscribe<ResumeGameSignal>(OnResumeGame);
+            _signulBusl.Unsubscribe<PauseGameSignal>(OnPauseGame);
+        }
+
+        public void OnStartGame()
         {
             if(_isPaused)
             {
@@ -33,7 +51,7 @@ namespace ShootEmUp
             ClearEnemies();
         }
 
-        public void FinishGame()
+        public void OnFinishGame()
         {
             _cts?.Cancel();
             _cts?.Dispose();
@@ -122,14 +140,16 @@ namespace ShootEmUp
             });
         }
 
-        public void ResumeGame()
+        public void OnResumeGame()
         {
             _isPaused = false;
         }
 
-        public void PauseGame()
+        public void OnPauseGame()
         {
             _isPaused = true;
         }
+
+
     }
 }

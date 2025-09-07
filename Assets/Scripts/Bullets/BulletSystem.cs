@@ -3,33 +3,32 @@ using System.Collections.Generic;
 using System.Linq;
 using TNRD;
 using UnityEngine;
+using Zenject;
 
 namespace ShootEmUp
 {
-    public sealed class BulletSystem : MonoBehaviour, IBulletLaucnher, IFixedTickable, IStartGameListener
+    public sealed class BulletSystem : IBulletLaucnher, IFixedTickableCustom, IInitializable, IDisposable
     {
-        [SerializeField]
-        private Int32 _initialCount = 75;
-        
-        [SerializeField] private Transform _poolBulletContainer;
-        [SerializeField] private Bullet _bulletPrefab;
-        [SerializeField] private Transform _worldTransform;
-        [SerializeField] private SerializableInterface<ILevelBoundCheck> _levelBoundsChecker;
-        [SerializeField] private BulletStateInstaller _bulletStateInstaller;
+        [Inject] private SignalBus _signalBus;
+        [Inject] private BulletPool _bulletPool;
+        [Inject] private ILevelBoundCheck _levelBoundsChecker;
 
-        private readonly Queue<Bullet> _bulletPool = new();
-        private readonly HashSet<Bullet> _activeBullets = new();
-        private readonly List<Bullet> _activeBulletsFrameCache = new();
-        
-        private void Awake()
+        private HashSet<Bullet> _activeBullets;
+        private List<Bullet> _activeBulletsFrameCache;
+
+        public void Initialize()
         {
-            for (var i = 0; i < _initialCount; i++)
-            {
-                var bullet = Instantiate(_bulletPrefab, _poolBulletContainer);
-                _bulletPool.Enqueue(bullet);
-            }
+            _activeBullets = new();
+            _activeBulletsFrameCache = new();
+
+            _signalBus.Subscribe<StartGameSignal>(OnStartGame);
         }
-        
+
+        public void Dispose()
+        {
+            _signalBus.Unsubscribe<StartGameSignal>(OnStartGame);
+        }
+
         public void FixedTick()
         {
             _activeBulletsFrameCache.Clear();
@@ -39,7 +38,7 @@ namespace ShootEmUp
             {
                 var bullet = _activeBulletsFrameCache[i];
 
-                if (!_levelBoundsChecker.Value.InBounds(bullet.transform.position))
+                if (!_levelBoundsChecker.InBounds(bullet.transform.position))
                 {
                     BulletEndLife(bullet);
                 }
@@ -48,48 +47,34 @@ namespace ShootEmUp
 
         public void FlyBulletByArgs(BulletData args)
         {
-            if (_bulletPool.TryDequeue(out var bullet))
-            {
-                bullet.transform.SetParent(_worldTransform);
-            }
-            else
-            {
-                bullet = Instantiate(_bulletPrefab, _worldTransform);
-                Debug.LogWarning("Bullet pull empty!");
-            }
-
-            bullet.BulletSetup(args);
-
-            if (_activeBullets.Add(bullet))
-            {
-                bullet.OnCollisionEntered += OnBulletCollision;
-            }
-
-            _bulletStateInstaller.RegisterBuletStateHandles(bullet.GetComponents<IGameStateListener>());
+            Bullet bullet = _bulletPool.Spawn(args);
+            bullet.OnCollisionEntered += OnBulletCollision;
+            _activeBullets.Add(bullet);
         }
         
         private void OnBulletCollision(Bullet bullet, Collision2D collision)
         {
             BulletUtils.TryDealDamage(bullet, collision.gameObject);
+            bullet.OnCollisionEntered -= OnBulletCollision;
+
             BulletEndLife(bullet);
         }
 
         private void BulletEndLife(Bullet bullet)
         {
-            if (_activeBullets.Remove(bullet))
-            {
-                bullet.OnCollisionEntered -= OnBulletCollision;
-                bullet.transform.SetParent(_poolBulletContainer);
-                _bulletPool.Enqueue(bullet);
-
-                _bulletStateInstaller.DeleteBuletStateHandles(bullet.GetComponents<IGameStateListener>());
-            }
+            _bulletPool.Despawn(bullet);
+            _activeBullets.Remove(bullet);
         }
 
-        public void StartGame()
+        public void OnStartGame()
         {
-            foreach (var bullet in _activeBullets.ToList())
-                BulletEndLife(bullet);
+            foreach (var item in _activeBullets)
+            {
+                BulletEndLife(item);
+            }
+
+            _activeBullets = new();
+            _activeBulletsFrameCache = new();
         }
     }
 }

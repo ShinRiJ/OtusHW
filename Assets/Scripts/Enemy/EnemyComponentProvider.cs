@@ -13,9 +13,9 @@ namespace ShootEmUp
         public IEnemyMoveAgent EnemyMoveAgentInstance => _enemyMoveAgentInstance;
         public IEnemyAttackConfigure EnemyAttackAgentInstance => _enemyAttackAgentInstance;
 
-        public ITickable[] GetTickableComponets()
+        public ITickableCustom[] GetTickableComponets()
         {
-            return GetComponents<ITickable>();
+            return GetComponents<ITickableCustom>();
         }
     }
 }

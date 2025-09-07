@@ -1,14 +1,21 @@
 using System;
 using UnityEngine;
+using Zenject;
 
 namespace ShootEmUp
 {
-    public sealed class HitPointsComponent : MonoBehaviour, IHitPointEndNotifier, IHitPointDamageRecieve, IHitPointInitRestore
+    public sealed class HitPointsComponent : IHitPointDamageRecieve, IHitPointInitRestore, IHitPointEndNotifier
     {
+        private Int32 _initialHitPoints;
+        private Int32 _hitPoints;
         public event Action<GameObject> OnHPEmpty;
-        
-        [SerializeField] private Int32 _hitPoints;
-        
+        private GameObject _gameObject;
+
+        public HitPointsComponent(Int32 hitPoints, GameObject gameObject)
+        {
+            _initialHitPoints = _hitPoints = hitPoints;
+        }
+
         public bool IsHitPointsExists()
         {
             return _hitPoints > 0;
@@ -20,13 +27,13 @@ namespace ShootEmUp
 
             if (_hitPoints <= 0)
             {
-                OnHPEmpty?.Invoke(gameObject);
+                OnHPEmpty?.Invoke(_gameObject);
             }
         }
 
-        public void InitRestoreHealth(int value)
+        public void InitRestoreHealth()
         {
-            _hitPoints = value;
+            _hitPoints = _initialHitPoints;
         }
     }
 }

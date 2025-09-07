@@ -1,17 +1,38 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using ShootEmUp;
-using UnityEngine;
+using Zenject;
 
-public class GameTickableController : MonoBehaviour, ITickerRegister, IPauseGameListener, IResumeGameListener, IStartGameListener
+public class GameTickableController : ITickable, IFixedTickable, IInitializable, IDisposable
 {
-    private List<ICommonTickable> _commonTickers = new List<ICommonTickable>();
-    private List<IFixedTickable> _fixedTickers = new List<IFixedTickable>();
+    [Inject] private SignalBus _signalBus;
+
+    private List<ICommonTickableCustom> _commonTickers = new List<ICommonTickableCustom>();
+    private List<IFixedTickableCustom> _fixedTickers = new List<IFixedTickableCustom>();
 
     private Boolean _isPaused = false;
 
-    void Update()
+    public void Initialize()
+    {
+        _signalBus.Subscribe<StartGameSignal>(OnStartGame);
+        _signalBus.Subscribe<ResumeGameSignal>(OnResumeGame);
+        _signalBus.Subscribe<PauseGameSignal>(OnPauseGame);
+    }
+
+    public void Dispose()
+    {
+        _signalBus.Unsubscribe<StartGameSignal>(OnStartGame);
+        _signalBus.Unsubscribe<ResumeGameSignal>(OnResumeGame);
+        _signalBus.Unsubscribe<PauseGameSignal>(OnPauseGame);
+    }
+
+    public GameTickableController(List<ICommonTickableCustom> commonTickableCustom, List<IFixedTickableCustom> fixedTickableCustoms)
+    {
+        _commonTickers = commonTickableCustom;
+        _fixedTickers = fixedTickableCustoms;
+    }
+
+    public void Tick()
     {
         if (_isPaused) return;
 
@@ -21,7 +42,7 @@ public class GameTickableController : MonoBehaviour, ITickerRegister, IPauseGame
         }
     }
 
-    void FixedUpdate()
+    public void FixedTick()
     {
         if (_isPaused) return;
 
@@ -31,51 +52,51 @@ public class GameTickableController : MonoBehaviour, ITickerRegister, IPauseGame
         }
     }
 
-    public void RegisterTickers(IEnumerable<ITickable> bufferTickers)
-    {
-        foreach (var ticker in bufferTickers)
-        {
-            RegisterTicker(ticker);
-        }
-    }
+    //public void RegisterTickers(IEnumerable<ITickableCustom> bufferTickers)
+    //{
+    //    foreach (var ticker in bufferTickers)
+    //    {
+    //        RegisterTicker(ticker);
+    //    }
+    //}
 
-    public void RegisterTicker(ITickable ticker)
-    {
-        if (ticker is ICommonTickable commonTickable)
-            _commonTickers.Add(commonTickable);
+    //public void RegisterTicker(ITickableCustom ticker)
+    //{
+    //    if (ticker is ICommonTickableCustom commonTickable)
+    //        _commonTickers.Add(commonTickable);
 
-        if (ticker is IFixedTickable fixedTickable)
-            _fixedTickers.Add(fixedTickable);
-    }
+    //    if (ticker is IFixedTickable fixedTickable)
+    //        _fixedTickers.Add(fixedTickable);
+    //}
 
-    public void DeleteTickers(IEnumerable<ITickable> bufferTickers)
-    {
-        foreach (var ticker in bufferTickers)
-        {
-            DeleteTicker(ticker);
-        }
-    }
+    //public void DeleteTickers(IEnumerable<ITickableCustom> bufferTickers)
+    //{
+    //    foreach (var ticker in bufferTickers)
+    //    {
+    //        DeleteTicker(ticker);
+    //    }
+    //}
 
-    public void DeleteTicker(ITickable ticker)
-    {
-        if (ticker is ICommonTickable commonTickable && _commonTickers.Contains(commonTickable))
-            _commonTickers.Remove(commonTickable);
+    //public void DeleteTicker(ITickableCustom ticker)
+    //{
+    //    if (ticker is ICommonTickableCustom commonTickable && _commonTickers.Contains(commonTickable))
+    //        _commonTickers.Remove(commonTickable);
 
-        if (ticker is IFixedTickable fixedTickable && _fixedTickers.Contains(fixedTickable))
-            _fixedTickers.Remove(fixedTickable);
-    }
+    //    if (ticker is IFixedTickable fixedTickable && _fixedTickers.Contains(fixedTickable))
+    //        _fixedTickers.Remove(fixedTickable);
+    //}
 
-    public void PauseGame()
+    public void OnPauseGame()
     {
         _isPaused = true;
     }
 
-    public void ResumeGame()
+    public void OnResumeGame()
     {
         _isPaused = false;
     }
 
-    public void StartGame()
+    public void OnStartGame()
     {
         if(_isPaused)
         {

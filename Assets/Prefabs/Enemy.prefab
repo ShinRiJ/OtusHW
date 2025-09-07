@@ -13,10 +13,6 @@ GameObject:
   - component: {fileID: 5568771391735819375}
   - component: {fileID: 659620479434099170}
   - component: {fileID: 6904627394683172199}
-  - component: {fileID: 5568771391735819379}
-  - component: {fileID: 5568771391735819372}
-  - component: {fileID: 5568771391735819373}
-  - component: {fileID: 5568771391735819374}
   - component: {fileID: 8186052948131603766}
   - component: {fileID: 6896809305229427933}
   m_Layer: 11
@@ -143,62 +139,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 309564d2db09846408047682220a3e5d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _hitPointInstance: {fileID: 5568771391735819373}
+  _hitPointInstance:
+    rid: -2
   _enemyMoveAgentInstance: {fileID: 8186052948131603766}
   _enemyAttackAgentInstance: {fileID: 6896809305229427933}
---- !u!114 &5568771391735819379
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 559606060570185700}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 52112fd3e5414bf991b1d54804cb28f5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _isPlayer: 0
---- !u!114 &5568771391735819372
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 559606060570185700}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ce88fee201654f6e8064002ed15de594, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _rigidbody2D: {fileID: 659620479434099170}
-  _speed: 5
---- !u!114 &5568771391735819373
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 559606060570185700}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ae5daa1be9cc40a78a2f07cd53e5b47e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _hitPoints: 1
---- !u!114 &5568771391735819374
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 559606060570185700}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ce164c84a74a425f8d2e82764aef9e34, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _firePoint: {fileID: 3195880656587174614}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!114 &8186052948131603766
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -213,10 +162,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _moveComponent:
     mode: 0
-    unityReference: {fileID: 5568771391735819372}
+    unityReference: {fileID: 0}
     rawReference:
       rid: -2
-  _arrivalDistance: 0.25
+  _arrivalDistanceTreshold: 0.25
   references:
     version: 2
     RefIds:
@@ -236,7 +185,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _weaponComponent:
     mode: 0
-    unityReference: {fileID: 5568771391735819374}
+    unityReference: {fileID: 0}
     rawReference:
       rid: -2
   _moveAgent:

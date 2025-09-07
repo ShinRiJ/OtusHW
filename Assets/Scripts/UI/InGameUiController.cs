@@ -2,24 +2,33 @@ using ShootEmUp;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
+using Zenject;
 
-public class InGameUiController : MonoBehaviour, IFinishGameListener
+public class InGameUiController : IInitializable, IDisposable
 {
-    public event Action OnGameStarted;
-    public event Action OnGamePaused;
-    public event Action OnGameResumed;
+    [Inject] private SignalBus _signalBus;
+    
+    private Button _startButton;
+    private Button _pauseButton;
+    private Button _resumeButton;
 
-    [SerializeField] private Button _startButton;
-    [SerializeField] private Button _pauseButton;
-    [SerializeField] private Button _resumeButton;
+    private GameObject _backGround;
 
-    [SerializeField] private GameObject _backGround;
+    [InjectLocal] GameLauncher _launcher;
+    [InjectLocal] EndGameUiController _endGameUiController;
 
-    [SerializeField] GameLauncher _launcher;
-    [SerializeField] EndGameUiController _endGameUiController;
-
-    private void Awake()
+    public InGameUiController(Button startButton, Button pauseButton, Button resumeButton, GameObject background)
     {
+        _startButton = startButton;
+        _pauseButton = pauseButton;
+        _resumeButton = resumeButton;
+        _backGround = background;
+    }
+
+    public void Initialize()
+    {
+        _signalBus.Subscribe<FinishGameSignal>(OnFinishGame);
+
         _startButton.onClick.AddListener(StartGame);
         _pauseButton.onClick.AddListener(PauseGame);
         _resumeButton.onClick.AddListener(ResumeGame);
@@ -32,6 +41,18 @@ public class InGameUiController : MonoBehaviour, IFinishGameListener
 
         _launcher.OnGameLaunched += PostStartGame;
         _endGameUiController.OnStartGameAgain += StartGame;
+    }
+
+    public void Dispose()
+    {
+        _signalBus.Unsubscribe<FinishGameSignal>(OnFinishGame);
+
+        _launcher.OnGameLaunched -= PostStartGame;
+        _endGameUiController.OnStartGameAgain -= StartGame;
+
+        _startButton.onClick.RemoveListener(StartGame);
+        _pauseButton.onClick.RemoveListener(PauseGame);
+        _resumeButton.onClick.RemoveListener(ResumeGame);
     }
 
     public void StartGame()
@@ -54,7 +75,7 @@ public class InGameUiController : MonoBehaviour, IFinishGameListener
         _pauseButton.gameObject.SetActive(true);
         _resumeButton.gameObject.SetActive(false);
 
-        OnGameStarted?.Invoke();
+        _signalBus.Fire<StartGameSignal>();
     }
 
     private void PauseGame()
@@ -62,7 +83,7 @@ public class InGameUiController : MonoBehaviour, IFinishGameListener
         _pauseButton.gameObject.SetActive(false);
         _resumeButton.gameObject.SetActive(true);
 
-        OnGamePaused?.Invoke();
+        _signalBus.Fire<PauseGameSignal>();
     }
 
     private void ResumeGame()
@@ -70,10 +91,10 @@ public class InGameUiController : MonoBehaviour, IFinishGameListener
         _pauseButton.gameObject.SetActive(true);
         _resumeButton.gameObject.SetActive(false);
 
-        OnGameResumed?.Invoke();
+        _signalBus.Fire<ResumeGameSignal>();
     }
 
-    public void FinishGame()
+    public void OnFinishGame()
     {
         InitEndGameUI();
     }

@@ -1,22 +1,37 @@
-using System;
 using ShootEmUp;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
+using Zenject;
 
-public class EndGameUiController : MonoBehaviour, IFinishGameListener
+public class EndGameUiController : IInitializable, IDisposable
 {
+    [Inject] private SignalBus _signalBus;
+
     public event Action OnStartGameAgain;
 
-    [SerializeField] private Button _startAgainButton;
+    private Button _startAgainButton;
+    private GameObject _backGround;
 
-    [SerializeField] private GameObject _backGround;
-
-    private void Awake()
+    public EndGameUiController(Button startAgainButton, GameObject backGround)
     {
+        _startAgainButton = startAgainButton;
+        _backGround = backGround;
+    }
+
+    public void Initialize()
+    {
+        _signalBus.Subscribe<FinishGameSignal>(OnFinishGame);
+
         _backGround.SetActive(false);
         _startAgainButton.gameObject.SetActive(false);
-
         _startAgainButton.onClick.AddListener(StartGameAgain);
+    }
+
+    public void Dispose()
+    {
+        _signalBus.Unsubscribe<FinishGameSignal>(OnFinishGame);
+        _startAgainButton.onClick.RemoveListener(StartGameAgain);
     }
 
     public void InitEndGameUI()
@@ -33,7 +48,7 @@ public class EndGameUiController : MonoBehaviour, IFinishGameListener
         OnStartGameAgain?.Invoke();
     }
 
-    public void FinishGame()
+    public void OnFinishGame()
     {
         InitEndGameUI();
     }

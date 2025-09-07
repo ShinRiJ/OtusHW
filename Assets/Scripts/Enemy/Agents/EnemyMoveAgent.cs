@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ShootEmUp
 {
-    public sealed class EnemyMoveAgent : MonoBehaviour, IEnemyMoveAgent, IFixedTickable
+    public sealed class EnemyMoveAgent : MonoBehaviour, IEnemyMoveAgent, IFixedTickableCustom
     {
         [SerializeField] private SerializableInterface<IMoveComponent> _moveComponent;
         [SerializeField] private Single _arrivalDistanceTreshold = 0.25f;

@@ -1,27 +1,33 @@
 using System;
 using TNRD;
 using UnityEngine;
+using Zenject;
 
 namespace ShootEmUp
 {
-    public sealed class DeathPlayerObserver : MonoBehaviour, IEndGameEvent
+    public sealed class DeathPlayerObserver : IInitializable, IDisposable, IEndGameEvent
     {
         public event Action OnEndGame;
-        [SerializeField] private SerializableInterface<ICharacterDeathNotifier> _characterControllerNotifier;
+        private ICharacterDeathNotifier _characterControllerNotifier;
 
-        private void OnEnable()
+        public DeathPlayerObserver(ICharacterDeathNotifier characterDeathNotifier)
         {
-            _characterControllerNotifier.Value.OnCharacterDeath += HandleCharacterDeath;
-        }
-
-        private void OnDisable()
-        {
-            _characterControllerNotifier.Value.OnCharacterDeath -= HandleCharacterDeath;
+            _characterControllerNotifier = characterDeathNotifier;
         }
 
         private void HandleCharacterDeath(CharacterStateController controller)
         {
             OnEndGame?.Invoke();
+        }
+
+        public void Initialize()
+        {
+            _characterControllerNotifier.OnCharacterDeath += HandleCharacterDeath;
+        }
+
+        public void Dispose()
+        {
+            _characterControllerNotifier.OnCharacterDeath -= HandleCharacterDeath;
         }
     }
 }

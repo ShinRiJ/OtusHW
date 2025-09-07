@@ -1,31 +1,51 @@
 using System;
 using TNRD;
 using UnityEngine;
+using Zenject;
 
 namespace ShootEmUp
 {
-    public sealed class CharacterStateController : MonoBehaviour, ICharacterDeathNotifier, IStartGameListener, IFinishGameListener
+    public sealed class CharacterStateController : ICharacterDeathNotifier, IDisposable, IInitializable
     {
+        [Inject] private SignalBus _signalBus;
+
         public event Action<CharacterStateController> OnCharacterDeath;
 
-        [SerializeField] Int32 _initCharacterHP = 5;
-        [SerializeField] private SerializableInterface<IHitPointEndNotifier> _hitPointEndInterface;
-        [SerializeField] private SerializableInterface<IHitPointInitRestore> _hitPointInitRestore;
+        private IHitPointEndNotifier _hitPointEndInterface;
+        private IHitPointInitRestore _hitPointInitRestore;
+
+        public void Initialize()
+        {
+            _signalBus.Subscribe<StartGameSignal>(OnStartGame);
+            _signalBus.Subscribe<FinishGameSignal>(OnFinishGame);
+        }
+
+        public void Dispose()
+        {
+            _signalBus.Unsubscribe<StartGameSignal>(OnStartGame);
+            _signalBus.Unsubscribe<FinishGameSignal>(OnFinishGame);
+        }
+
+        public CharacterStateController(IHitPointEndNotifier hitPointEndNotifier, IHitPointInitRestore hitPointInitRestore)
+        {
+            _hitPointEndInterface = hitPointEndNotifier;
+            _hitPointInitRestore = hitPointInitRestore;
+        }
 
         private void OnCharacterDeathHandler(GameObject _)
         {
             OnCharacterDeath?.Invoke(this);
         }
 
-        public void StartGame()
+        public void OnStartGame()
         {
-            _hitPointInitRestore.Value.InitRestoreHealth(_initCharacterHP);
-            _hitPointEndInterface.Value.OnHPEmpty += OnCharacterDeathHandler;
+            _hitPointInitRestore.InitRestoreHealth();
+            _hitPointEndInterface.OnHPEmpty += OnCharacterDeathHandler;
         }
 
-        public void FinishGame()
+        public void OnFinishGame()
         {
-            _hitPointEndInterface.Value.OnHPEmpty -= OnCharacterDeathHandler;
+            _hitPointEndInterface.OnHPEmpty -= OnCharacterDeathHandler;
         }
     }
 }

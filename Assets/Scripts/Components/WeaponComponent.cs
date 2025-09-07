@@ -1,11 +1,18 @@
 using System;
 using UnityEngine;
+using Zenject;
 
 namespace ShootEmUp
 {
-    public sealed class WeaponComponent : MonoBehaviour, IWeaponComponent
+    public sealed class WeaponComponent : IWeaponComponent
     {
-        [SerializeField] private Transform _firePoint;
+        private Transform _firePoint;
+
+        public WeaponComponent(Transform firePoint)
+        {
+            _firePoint = firePoint;
+        }
+
         public Vector2 GetShootingPosition()
         {
             return _firePoint.position;

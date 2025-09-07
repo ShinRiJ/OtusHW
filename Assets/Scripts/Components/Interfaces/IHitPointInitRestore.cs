@@ -2,8 +2,8 @@
 
 namespace ShootEmUp
 {
-    internal interface IHitPointInitRestore
+    public interface IHitPointInitRestore
     {
-        public void InitRestoreHealth(Int32 value);
+        public void InitRestoreHealth();
     }
 }

@@ -1,10 +1,13 @@
 using System;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
+using Zenject;
 
 namespace ShootEmUp
 {
-    public sealed class Bullet : MonoBehaviour, IPauseGameListener, IResumeGameListener
+    public sealed class Bullet : MonoBehaviour
     {
+        [Inject] SignalBus _signalBus;
         public event Action<Bullet, Collision2D> OnCollisionEntered;
 
         public Boolean IsPlayer { get; private set; }
@@ -17,6 +20,43 @@ namespace ShootEmUp
         private SpriteRenderer _spriteRenderer;
 
         private Vector2 _savedVelocity;
+
+        public Bullet(BulletData bulletData)
+        {
+            Init(bulletData);
+        }
+
+        public void Init(BulletData bulletData)
+        {
+            Initialize();
+            Damage = bulletData.Damage;
+            IsPlayer = bulletData.IsPlayer;
+            SetPosition(bulletData.Position);
+            SetColor(bulletData.Color);
+            SetPhysicsLayer(bulletData.PhysicsLayer);
+            SetVelocity(bulletData.Velocity);
+        }
+
+        public void Initialize()
+        {
+            _signalBus.Subscribe<ResumeGameSignal>(OnResumeGame);
+            _signalBus.Subscribe<PauseGameSignal>(OnPauseGame);
+        }
+
+        public void Dispose()
+        {
+            _signalBus.Unsubscribe<ResumeGameSignal>(OnResumeGame);
+            _signalBus.Unsubscribe<PauseGameSignal>(OnPauseGame);
+        }
+
+        public void Despawned()
+        {
+            Dispose();
+            _rigidbody2D.velocity = Vector2.zero;
+            gameObject.SetActive(false);
+            OnCollisionEntered = null;
+        }
+
 
         private void OnCollisionEnter2D(Collision2D collision)
         {
@@ -43,25 +83,32 @@ namespace ShootEmUp
             _spriteRenderer.color = color;
         }
 
-        public void BulletSetup(BulletData bulletData)
-        {
-            SetPosition(bulletData.Position);
-            SetColor(bulletData.Color);
-            SetPhysicsLayer(bulletData.PhysicsLayer);
-            Damage = bulletData.Damage;
-            IsPlayer = bulletData.IsPlayer;
-            SetVelocity(bulletData.Velocity);
-        }
-
-        public void ResumeGame()
+        public void OnResumeGame()
         {
             _rigidbody2D.velocity = _savedVelocity;
         }
 
-        public void PauseGame()
+        public void OnPauseGame()
         {
             _savedVelocity = _rigidbody2D.velocity;
             _rigidbody2D.velocity = Vector2.zero;
         }
     }
+
+    public class BulletPool : MonoMemoryPool<BulletData, Bullet>
+    {
+        protected override void Reinitialize(BulletData data, Bullet bullet)
+        {
+            bullet.Init(data);
+            bullet.gameObject.SetActive(true);
+            Container.Inject(bullet);
+        }
+
+        protected override void OnDespawned(Bullet bullet)
+        {
+            bullet.Despawned();
+        }
+    }
+
+
 }

@@ -4,15 +4,21 @@ using UnityEngine.EventSystems;
 
 namespace ShootEmUp
 {
-    public sealed class CharacterMoveController : MonoBehaviour, IFixedTickable
+    public sealed class CharacterMoveController : IFixedTickableCustom
     {
-        [SerializeField] private SerializableInterface<IInputManager> _inputManager;
-        [SerializeField] private SerializableInterface<IMoveComponent> _moveComponent;
+        private IInputManager _inputManager;
+        private IMoveComponent _moveComponent;
+
+        public CharacterMoveController(IInputManager inputManager, IMoveComponent moveComponent)
+        {
+            _inputManager = inputManager;
+            _moveComponent = moveComponent;
+        }
 
         public void FixedTick()
         {
-            _moveComponent.Value.MoveByRigidbodyVelocity(
-                new Vector2(_inputManager.Value.MoveDirection, 0) * Time.fixedDeltaTime
+            _moveComponent.MoveByRigidbodyVelocity(
+                new Vector2(_inputManager.MoveDirection, 0) * Time.fixedDeltaTime
             );
         }
     }

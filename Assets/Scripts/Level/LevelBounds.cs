@@ -3,20 +3,21 @@ using UnityEngine;
 
 namespace ShootEmUp
 {
-    public sealed class LevelBounds : MonoBehaviour, ILevelBoundCheck
+    public sealed class LevelBounds : ILevelBoundCheck
     {
-        [SerializeField]
         private Transform _leftBorder;
-
-        [SerializeField]
         private Transform _rightBorder;
-
-        [SerializeField]
         private Transform _downBorder;
-
-        [SerializeField]
         private Transform _topBorder;
-        
+
+        public LevelBounds(BorderTransforms borderTransforms)
+        {
+            _leftBorder = borderTransforms.LeftBorder;
+            _rightBorder = borderTransforms.RightBorder;
+            _downBorder = borderTransforms.DownBorder;
+            _topBorder = borderTransforms.TopBorder;
+        }
+
         public Boolean InBounds(Vector3 position)
         {
             var positionX = position.x;

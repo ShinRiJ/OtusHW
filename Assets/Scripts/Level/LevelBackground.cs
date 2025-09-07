@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ShootEmUp
 {
-    public sealed class LevelBackground : MonoBehaviour, IFixedTickable
+    public sealed class LevelBackground : IFixedTickableCustom
     {
         private float _startPositionY;
 
@@ -17,14 +17,11 @@ namespace ShootEmUp
 
         private Transform _myTransform;
 
-        [SerializeField]
-        private BackGroundParams _backgroundParams;
-
-        private void Awake()
+        public LevelBackground(BackGroundParams backGroundParams, Transform transform)
         {
-            _startPositionY = _backgroundParams._startPositionY;
-            _endPositionY = _backgroundParams._endPositionY;
-            _movingSpeedY = _backgroundParams._movingSpeedY;
+            _startPositionY = backGroundParams._startPositionY;
+            _endPositionY = backGroundParams._endPositionY;
+            _movingSpeedY = backGroundParams._movingSpeedY;
             _myTransform = transform;
             var position = _myTransform.position;
             _positionX = position.x;

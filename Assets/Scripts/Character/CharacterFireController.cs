@@ -1,27 +1,46 @@
 using System;
-using TNRD;
 using UnityEngine;
+using Zenject;
 
 namespace ShootEmUp
 {
-    public sealed class CharacterFireController : MonoBehaviour, ICharacterFireRequest, IStartGameListener, IFinishGameListener, IFixedTickable
+    public sealed class CharacterFireController : ICharacterFireRequest, IInitializable, IDisposable, IFixedTickableCustom
     {
-        [SerializeField] private SerializableInterface<IWeaponComponent> _weaponComponent;
-        [SerializeField] private SerializableInterface<IBulletLaucnher> _bulletSystem;
-        [SerializeField] private SerializableInterface<IInputManager> _inputManager;
+        [Inject] private SignalBus _signalBus;
+        [Inject] private IBulletLaucnher _bulletSystem;
 
-        [SerializeField] private BulletConfig _bulletConfig;
+        [InjectLocal] private IWeaponComponent _weaponComponent;
+        [InjectLocal] private IInputManager _inputManager;
+
+        private BulletConfig _bulletConfig;
 
         private Boolean _fireRequired;
 
-        public void StartGame()
+        public void Initialize()
         {
-            _inputManager.Value.OnFireAction += FireRequest;
+            _signalBus.Subscribe<StartGameSignal>(OnStartGame);
+            _signalBus.Subscribe<FinishGameSignal>(OnFinishGame);
         }
 
-        public void FinishGame()
+        public void Dispose()
         {
-            _inputManager.Value.OnFireAction -= FireRequest;
+            _signalBus.Unsubscribe<StartGameSignal>(OnStartGame);
+            _signalBus.Unsubscribe<FinishGameSignal>(OnFinishGame);
+        }
+
+        public CharacterFireController(BulletConfig bulletConfig)
+        {
+            _bulletConfig = bulletConfig;
+        }
+
+        public void OnStartGame()
+        {
+            _inputManager.OnFireAction += FireRequest;
+        }
+
+        public void OnFinishGame()
+        {
+            _inputManager.OnFireAction -= FireRequest;
         }
 
         public void FixedTick()
@@ -42,14 +61,14 @@ namespace ShootEmUp
 
         private void OnFlyBullet()
         {
-            _bulletSystem.Value.FlyBulletByArgs(new BulletData
+            _bulletSystem.FlyBulletByArgs(new BulletData
             {
                 IsPlayer = true,
                 PhysicsLayer = _bulletConfig.PhysicsLayer,
                 Color = _bulletConfig.Color,
                 Damage = _bulletConfig.Damage,
-                Position = _weaponComponent.Value.GetShootingPosition(),
-                Velocity = _weaponComponent.Value.GetShootingVelocity(Vector3.up, _bulletConfig.Speed)
+                Position = _weaponComponent.GetShootingPosition(),
+                Velocity = _weaponComponent.GetShootingVelocity(Vector3.up, _bulletConfig.Speed)
             });
         }
 
@@ -57,6 +76,5 @@ namespace ShootEmUp
         {
             _fireRequired = true;
         }
-
     }
 }

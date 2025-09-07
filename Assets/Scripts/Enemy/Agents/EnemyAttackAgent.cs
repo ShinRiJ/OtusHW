@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ShootEmUp
 {
-    public sealed class EnemyAttackAgent : MonoBehaviour, IEnemyAttackConfigure, IFixedTickable
+    public sealed class EnemyAttackAgent : MonoBehaviour, IEnemyAttackConfigure, IFixedTickableCustom
     {
         public event Action<GameObject, Vector2, Vector2, IWeaponComponent> OnFire;
 

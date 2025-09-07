@@ -2,7 +2,7 @@
 
 namespace ShootEmUp
 {
-    internal interface IEndGameEvent
+    public interface IEndGameEvent
     {
         public event Action OnEndGame;
     }
