@@ -12,9 +12,9 @@ GameObject:
   - component: {fileID: 7936085547460007407}
   - component: {fileID: 5568771391735819375}
   - component: {fileID: 659620479434099170}
-  - component: {fileID: 6904627394683172199}
-  - component: {fileID: 8186052948131603766}
-  - component: {fileID: 6896809305229427933}
+  - component: {fileID: 4568152767268128932}
+  - component: {fileID: 393389185118038802}
+  - component: {fileID: 7104611649980931421}
   m_Layer: 11
   m_Name: Enemy
   m_TagString: Untagged
@@ -127,7 +127,7 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
---- !u!114 &6904627394683172199
+--- !u!114 &4568152767268128932
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -136,19 +136,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 559606060570185700}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 309564d2db09846408047682220a3e5d, type: 3}
+  m_Script: {fileID: 11500000, guid: 08eca9f7688a0a24685b89133b020c8e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _hitPointInstance:
-    rid: -2
-  _enemyMoveAgentInstance: {fileID: 8186052948131603766}
-  _enemyAttackAgentInstance: {fileID: 6896809305229427933}
-  references:
-    version: 2
-    RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
---- !u!114 &8186052948131603766
+  _scriptableObjectInstallers: []
+  _monoInstallers:
+  - {fileID: 393389185118038802}
+  _installerPrefabs: []
+  _autoRun: 1
+  _kernel: {fileID: 0}
+--- !u!114 &393389185118038802
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -157,21 +154,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 559606060570185700}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5bdb5771141e4cf18c434a69ec116e09, type: 3}
+  m_Script: {fileID: 11500000, guid: f0296739ea23cb346a959bd1803b63d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _moveComponent:
-    mode: 0
-    unityReference: {fileID: 0}
-    rawReference:
-      rid: -2
-  _arrivalDistanceTreshold: 0.25
-  references:
-    version: 2
-    RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
---- !u!114 &6896809305229427933
+  _isPlayer: 0
+  _firePoint: {fileID: 3195880656587174614}
+  _enemyHitPoints: 1
+  _enemySpeed: 5
+  _rigidbody2D: {fileID: 659620479434099170}
+--- !u!114 &7104611649980931421
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -180,25 +171,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 559606060570185700}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ba7965842e74a9f89ba3aa66d61da46, type: 3}
+  m_Script: {fileID: 11500000, guid: 6f70d18e14ae18246866789d155c64f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _weaponComponent:
-    mode: 0
-    unityReference: {fileID: 0}
-    rawReference:
-      rid: -2
-  _moveAgent:
-    mode: 0
-    unityReference: {fileID: 8186052948131603766}
-    rawReference:
-      rid: -2
-  _countdown: 1
-  references:
-    version: 2
-    RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
 --- !u!1 &2239154907127902911
 GameObject:
   m_ObjectHideFlags: 0

@@ -21,9 +21,9 @@ public class GameTickableController : ITickable, IFixedTickable, IInitializable,
 
     public void Dispose()
     {
-        _signalBus.Unsubscribe<StartGameSignal>(OnStartGame);
-        _signalBus.Unsubscribe<ResumeGameSignal>(OnResumeGame);
-        _signalBus.Unsubscribe<PauseGameSignal>(OnPauseGame);
+        _signalBus.TryUnsubscribe<StartGameSignal>(OnStartGame);
+        _signalBus.TryUnsubscribe<ResumeGameSignal>(OnResumeGame);
+        _signalBus.TryUnsubscribe<PauseGameSignal>(OnPauseGame);
     }
 
     public GameTickableController(List<ICommonTickableCustom> commonTickableCustom, List<IFixedTickableCustom> fixedTickableCustoms)

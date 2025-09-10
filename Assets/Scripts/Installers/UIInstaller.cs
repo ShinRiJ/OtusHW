@@ -22,7 +22,7 @@ public class UIInstaller : MonoInstaller
 
     override public void InstallBindings()
     {
-        Container.BindInterfacesAndSelfTo<GameLauncher>().AsSingle().WithArguments(_countdownTextUIElement, _initCounterValue).NonLazy();
+        Container.BindInterfacesAndSelfTo<GameLauncher>().AsSingle().WithArguments(_countdownTextUIElement, _initCounterValue).NonLazy(); //Система отсчёта
         Container.BindInterfacesAndSelfTo<EndGameUiController>().AsSingle().WithArguments(_startAgainButton, _backGroundEndGame).NonLazy();
         Container.BindInterfacesAndSelfTo<InGameUiController>().AsSingle().WithArguments(_startButton, _pauseButton, _resumeButton, _backGroundInGame).NonLazy();
     }

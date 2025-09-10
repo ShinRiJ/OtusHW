@@ -4,7 +4,7 @@ using Zenject;
 
 namespace ShootEmUp
 {
-    public class GlobalSceneInstaller : MonoInstaller
+    public class GlobalGameInstaller : MonoInstaller
     {
         [SerializeField] private GameObject _bulletPrefab;
         [SerializeField] private GameObject _playerPrefab;
@@ -20,6 +20,7 @@ namespace ShootEmUp
 
         public override void InstallBindings()
         {
+            //-------------------Сигнальная шина-------------------
             SignalBusInstaller.Install(Container);
 
             Container.DeclareSignal<StartGameSignal>();
@@ -27,39 +28,27 @@ namespace ShootEmUp
             Container.DeclareSignal<ResumeGameSignal>();
             Container.DeclareSignal<PauseGameSignal>();
 
+            //-------------------Системы игры в нужном порядке-------------------
             Container.Bind<Transform>().WithId("PlayerSpawnPoint").FromInstance(_playerSpawnPoint);
-
-            Container.Bind<ICharacterDeathNotifier>().
-                FromSubContainerResolve().
-                ByNewContextPrefab(_playerPrefab).
-                UnderTransform(_playerRoot).
-                AsSingle();
 
             Container.BindInterfacesAndSelfTo<LevelBounds>().FromInstance(new LevelBounds(_borderTransforms)).AsSingle().NonLazy();
             Container.BindInterfacesAndSelfTo<LevelBackground>().FromInstance(new LevelBackground(_backGroundParams, _backgroundTransform)).AsSingle().NonLazy();
 
-            Container.BindInterfacesAndSelfTo<DeathPlayerObserver>().AsSingle().NonLazy();
+            Container.Bind<PlayerFacade>().FromComponentInNewPrefab(_playerPrefab).UnderTransform(_playerRoot).AsSingle();
 
-            Container.BindInterfacesAndSelfTo<GameStateManager>().AsSingle().NonLazy();
+            Container.Bind<GameObject>().WithId("Player").FromResolveGetter<PlayerFacade>(x => x.gameObject).AsSingle(); //Тащим GO игрока для системы спавна врагов
+            Container.Bind<ICharacterDeathNotifier>().FromResolveGetter<PlayerFacade>(x => x.CharacterDeathNotifier).AsSingle(); //Тащим интерфейс с собтием смерти игрока для рестрта
 
-            Container.BindMemoryPool<Bullet, BulletPool>()
-                .WithInitialSize(_initialPoolSize)
-                .FromComponentInNewPrefab(_bulletPrefab)
-                .UnderTransformGroup("Bullets");
+            Container.BindInterfacesAndSelfTo<DeathPlayerObserver>().AsSingle().NonLazy(); 
 
-            Container.BindInterfacesTo<BulletSystem>()
-                .AsSingle()
-                .NonLazy();
+            Container.BindInterfacesAndSelfTo<GameStateManager>().AsSingle().NonLazy(); 
 
+            Container.BindMemoryPool<Bullet, BulletPool>().WithInitialSize(_initialPoolSize).FromComponentInNewPrefab(_bulletPrefab).UnderTransformGroup("Bullets");
 
+            Container.BindInterfacesTo<BulletSystem>().AsSingle().NonLazy();
+
+            //-------------------Тикер-------------------
             Container.BindInterfacesAndSelfTo<GameTickableController>().AsSingle().NonLazy();
         }
     }
-
-    public class StartGameSignal { }
-    public class PauseGameSignal { }
-    public class FinishGameSignal { }
-    public class ResumeGameSignal { }
-
-
 }

@@ -1,16 +1,24 @@
 using System;
 using TNRD;
 using UnityEngine;
+using Zenject;
 
 namespace ShootEmUp
 {
-    public sealed class EnemyMoveAgent : MonoBehaviour, IEnemyMoveAgent, IFixedTickableCustom
+    public sealed class EnemyMoveAgent : IEnemyMoveAgent, IFixedTickableCustom
     {
-        [SerializeField] private SerializableInterface<IMoveComponent> _moveComponent;
-        [SerializeField] private Single _arrivalDistanceTreshold = 0.25f;
+        [InjectLocal] private IMoveComponent _moveComponent;
+
+        private Transform _myTransform;
+        private Single _arrivalDistanceTreshold = 0.25f;
         
         private Boolean _isReached;
         private Vector2 _destinationPoint;
+
+        public EnemyMoveAgent(Transform transform)
+        {
+            _myTransform = transform;
+        }
 
         public void SetDestination(Vector2 endPoint)
         {
@@ -30,7 +38,7 @@ namespace ShootEmUp
                 return;
             }
             
-            var vector = _destinationPoint - (Vector2) transform.position;
+            var vector = _destinationPoint - (Vector2)_myTransform.position;
 
             if (vector.magnitude <= _arrivalDistanceTreshold)
             {
@@ -39,7 +47,7 @@ namespace ShootEmUp
             }
 
             var direction = vector.normalized * Time.fixedDeltaTime;
-            _moveComponent.Value.MoveByRigidbodyVelocity(direction);
+            _moveComponent.MoveByRigidbodyVelocity(direction);
         }
     }
 }

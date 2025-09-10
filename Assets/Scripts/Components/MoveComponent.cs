@@ -6,6 +6,8 @@ namespace ShootEmUp
 {
     public sealed class MoveComponent : IMoveComponent
     {
+        [Inject] private LevelBounds _bounds;
+
         private Rigidbody2D _rigidbody2D;
         private Single _speed = 5.0f;
 
@@ -18,7 +20,9 @@ namespace ShootEmUp
         public void MoveByRigidbodyVelocity(Vector2 vector)
         {
             var nextPosition = _rigidbody2D.position + vector * _speed;
-            _rigidbody2D.MovePosition(nextPosition);
+
+            if(_bounds.InBounds(nextPosition))
+                _rigidbody2D.MovePosition(nextPosition);
         }
     }
 }

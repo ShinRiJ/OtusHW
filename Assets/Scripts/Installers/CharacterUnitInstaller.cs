@@ -4,7 +4,7 @@ using Zenject;
 
 namespace ShootEmUp
 {
-    public class CharacterInstaller : MonoInstaller
+    public class CharacterUnitInstaller : MonoInstaller
     {
         [SerializeField] private Boolean _isPlayer;
         [SerializeField] private Int32 _healthPoint;
@@ -17,12 +17,12 @@ namespace ShootEmUp
 
         public override void InstallBindings()
         {
+            Container.Bind<GameObject>().WithId("Self").FromInstance(gameObject).AsSingle();
             // --- Компоненты персонажа ---
             Container.BindInterfacesAndSelfTo<HitPointsComponent>().AsSingle().WithArguments(_healthPoint, gameObject); ;
             Container.BindInterfacesAndSelfTo<WeaponComponent>().AsSingle().WithArguments(_firePoint);
             Container.BindInterfacesAndSelfTo<TeamComponent>().AsSingle().WithArguments(_isPlayer);
             Container.BindInterfacesAndSelfTo<MoveComponent>().AsSingle().WithArguments(_rigidbody2D, _moveSpeed);
-
             Container.BindInterfacesAndSelfTo<SpawnComponent>().AsSingle().WithArguments(transform);
 
 

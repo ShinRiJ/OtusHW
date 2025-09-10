@@ -4,6 +4,7 @@ using System.Linq;
 using TNRD;
 using UnityEngine;
 using Zenject;
+using Zenject.SpaceFighter;
 
 namespace ShootEmUp
 {
@@ -70,7 +71,7 @@ namespace ShootEmUp
         {
             foreach (var item in _activeBullets)
             {
-                BulletEndLife(item);
+                _bulletPool.Despawn(item);
             }
 
             _activeBullets = new();

@@ -8,18 +8,29 @@ using UnityEngine;
 using Zenject;
 namespace ShootEmUp
 {
-    public sealed class EnemyLifecycleManager : MonoBehaviour, IInitializable, IDisposable
+    public sealed class EnemyLifecycleManager : IInitializable, IDisposable
     {
         [Inject] private SignalBus _signulBusl; 
+        [Inject] private IBulletLaucnher _bulletSystem;
 
-        [SerializeField] private SerializableInterface<IEnemyPool> _enemyPool;
-        [SerializeField] private SerializableInterface<IBulletLaucnher> _bulletSystem;
-        [SerializeField] private BulletConfig _bulletConfig;
-        [SerializeField] private Single _cyclePeriod = 1;
+        [InjectLocal] private EnemyPool _enemyPool;
+
+        [Inject(Id = "Player")] GameObject _target;
+
+        private BulletConfig _bulletConfig;
+        private Single _cyclePeriod = 1;
         
-        private readonly HashSet<GameObject> _activeEnemies = new();
+        private readonly HashSet<EnemyFacade> _activeEnemies = new();
         private CancellationTokenSource _cts;
         private Boolean _isPaused = false;
+        private Int32 _enemyMaxCount;
+
+        public EnemyLifecycleManager(BulletConfig bulletConfig, Single cyclePriod, Int32 enemyMaxCount)
+        {
+            _bulletConfig = bulletConfig;
+            _cyclePeriod = cyclePriod;
+            _enemyMaxCount = enemyMaxCount;
+        }
 
         public void Initialize()
         {
@@ -27,7 +38,6 @@ namespace ShootEmUp
             _signulBusl.Subscribe<FinishGameSignal>(OnFinishGame);
             _signulBusl.Subscribe<ResumeGameSignal>(OnResumeGame);
             _signulBusl.Subscribe<PauseGameSignal>(OnPauseGame);
-
         }
 
         public void Dispose()
@@ -62,28 +72,16 @@ namespace ShootEmUp
         {
             while (!token.IsCancellationRequested)
             {
-                await UniTask.WaitUntil(() => !_isPaused);
                 await UniTask.Delay(TimeSpan.FromSeconds(_cyclePeriod), cancellationToken: token);
+                await UniTask.WaitUntil(() => !_isPaused);
 
-                if(_isPaused)
+                if(_activeEnemies.Count < _enemyMaxCount)
                 {
-                    await UniTask.WaitUntil(() => !_isPaused);
-                    await UniTask.Delay(TimeSpan.FromSeconds(_cyclePeriod), cancellationToken: token);
-                }
+                    EnemyFacade enemy = _enemyPool.Spawn(_target);
+                    enemy.OnDeath += OnDestroyed;
+                    enemy.EnemyAttackAgent.OnFire += OnFire;
 
-                var enemy = _enemyPool.Value.TryGetNewEnemy();
-                if (enemy != null)
-                {
-                    if (_activeEnemies.Add(enemy))
-                    {
-                        EnemyComponentProvider tempEnemy = enemy.GetComponent<EnemyComponentProvider>();
-
-                        if (tempEnemy != null)
-                        {
-                            tempEnemy.HitPointInstance.OnHPEmpty += OnDestroyed;
-                            tempEnemy.EnemyAttackAgentInstance.OnFire += OnFire;
-                        }
-                    }    
+                    _activeEnemies.Add(enemy);
                 }
             }
         }
@@ -95,41 +93,29 @@ namespace ShootEmUp
                 return;
             }
 
-            foreach (var enemy in _activeEnemies)
+            foreach (EnemyFacade enemy in _activeEnemies)
             {
-                if (enemy == null) continue;
-
-                RemoveEnemyFromGame(enemy);
-
-                _enemyPool.Value.RemoveEnemy(enemy);
+                _enemyPool.Despawn(enemy);
             }
 
             _activeEnemies.Clear();
         }
 
-        private void OnDestroyed(GameObject enemy)
+        private void OnDestroyed(EnemyFacade enemy)
         {
             if (_activeEnemies.Remove(enemy))
             {
-                RemoveEnemyFromGame(enemy);
-                _enemyPool.Value.RemoveEnemy(enemy);
+                 enemy.OnDeath -= OnDestroyed;
+                enemy.EnemyAttackAgent.OnFire -= OnFire;
+
+                _enemyPool.Despawn(enemy);
             }
         }
 
-        private void RemoveEnemyFromGame(GameObject enemy)
-        {
-            EnemyComponentProvider tempEnemy = enemy.GetComponent<EnemyComponentProvider>();
-
-            if (tempEnemy != null)
-            {
-                tempEnemy.HitPointInstance.OnHPEmpty -= OnDestroyed;
-                tempEnemy.EnemyAttackAgentInstance.OnFire -= OnFire;
-            }
-        }
 
         private void OnFire(GameObject enemy, Vector2 position, Vector2 direction, IWeaponComponent weaponComponent)
         {
-            _bulletSystem.Value.FlyBulletByArgs(new BulletData
+            _bulletSystem.FlyBulletByArgs(new BulletData
             {
                 IsPlayer = false,
                 PhysicsLayer = _bulletConfig.PhysicsLayer,
