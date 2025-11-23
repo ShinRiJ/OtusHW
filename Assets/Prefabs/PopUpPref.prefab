@@ -4314,7 +4314,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7843055131501607198}
-  - component: {fileID: 7843055131501607185}
+  - component: {fileID: 5219406385376114279}
+  - component: {fileID: 4245438686226036691}
+  - component: {fileID: 4110411384918576510}
+  - component: {fileID: 7293492998818018508}
+  - component: {fileID: 3008608506453875466}
   m_Layer: 5
   m_Name: PopUpPref
   m_TagString: Untagged
@@ -4345,7 +4349,7 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &7843055131501607185
+--- !u!114 &5219406385376114279
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -4354,16 +4358,56 @@ MonoBehaviour:
   m_GameObject: {fileID: 7843055131501607199}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8703539f82f302c4aa421c4387c61a1f, type: 3}
+  m_Script: {fileID: 11500000, guid: 66d1d487e61ccaf449b97cef3df8b257, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _characterMainInfoView: {fileID: 4245438686226036691}
+  _characterInfoXPBarView: {fileID: 4110411384918576510}
+  _characterStatsView: {fileID: 7293492998818018508}
+  _characterButtonsView: {fileID: 3008608506453875466}
+--- !u!114 &4245438686226036691
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7843055131501607199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c98d671442e4f54ca7f59097da128a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _avatarImage: {fileID: 7843055130987917454}
   _idText: {fileID: 7843055130172606140}
   _levelText: {fileID: 7843055131181536220}
   _descriptionText: {fileID: 7843055130833785553}
+--- !u!114 &4110411384918576510
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7843055131501607199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b701dc10cfb6f984c94f3db3cd793515, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
   _XPBarNotCompletedImage: {fileID: 7843055131554727449}
   _XPBarCompletedImage: {fileID: 7843055130778810745}
   _XPBarText: {fileID: 7843055129695054505}
+--- !u!114 &7293492998818018508
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7843055131501607199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48774c72bd90f7a479e22ee04582d1bd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
   _statsVievList:
   - {fileID: 7843055130154476749}
   - {fileID: 7843055131087090969}
@@ -4371,9 +4415,21 @@ MonoBehaviour:
   - {fileID: 7843055130711705172}
   - {fileID: 7843055130665330135}
   - {fileID: 7843055129972993859}
-  _closeButton: {fileID: 7843055131268192674}
-  _levelUPButtonActive: {fileID: 7843055131098020183}
-  _levelUPButtonInactive: {fileID: 7843055129936713669}
+--- !u!114 &3008608506453875466
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7843055131501607199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 142866cc0c3e37643a0c3541ee3a41bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CloseButton: {fileID: 7843055131268192674}
+  LevelUPButtonActive: {fileID: 7843055131098020183}
+  LevelUPButtonInactive: {fileID: 7843055129936713669}
 --- !u!1 &7843055131531176031
 GameObject:
   m_ObjectHideFlags: 0

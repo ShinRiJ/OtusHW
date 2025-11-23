@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfe37850d5284774c904f9c10ba078c2, type: 3}
+  m_Name: BarbarianProvider
+  m_EditorClassIdentifier: 
+  _baseModels:
+  - {fileID: 11400000, guid: f90932a1422d8d543b7b8e89020d51a6, type: 2}
+  - {fileID: 11400000, guid: fc298c383c1d7aa4f8ceea0afc81c2a7, type: 2}
+  - {fileID: 11400000, guid: b464d05f50d2c4e4fbcaa80e228b226e, type: 2}

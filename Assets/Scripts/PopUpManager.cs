@@ -1,10 +1,15 @@
+using Newtonsoft.Json.Linq;
 using PopUp;
 using Sirenix.OdinInspector;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.Analytics;
 using UnityEngine.UI;
+using Zenject.SpaceFighter;
+using static PopUp.CharacterStatsViewModel;
 
 namespace PopUp
 {
@@ -13,52 +18,135 @@ namespace PopUp
         [SerializeField, ShowInInspector]
         private Int32 _playerID;
 
-        [SerializeField, ShowInInspector]
-        private GameObject _characterInfoViewPrefab;
+        private Int32 _currentCharID;
 
         [SerializeField, ShowInInspector]
-        private List<CharacterModel> _characterModels;
+        private GameObject _characterListPrefab;
 
-        private CharacterModel _currentCharacterModel;
-        private CharacterInfoView _characterInfoView;
-        private CharacterViewModel _characterViewModel;
+        [SerializeField, ShowInInspector]
+        private List<CharacterModelProvider> _characterModelProviders;
 
         private GameObject _popUpObject;
 
-        private Int32 _currentCharID;
+        private CharacterViewProvider _characterViewProvider;
+        private CharacterModelProvider _currentCharacterModelProvider;
 
+        private CharacterXPModel _currentCharacterXPFastLinkDebug;
+
+        private List<IViewModel> _currentCharacterViewModelList;
+        
         private void Start()
         {
-            _popUpObject = Instantiate(_characterInfoViewPrefab);
+            _popUpObject = Instantiate(_characterListPrefab);
             _popUpObject.transform.SetParent(transform, false);
 
-            _characterInfoView = _popUpObject.GetComponent<CharacterInfoView>();
-
             _currentCharID = 0;
-            CharacterSwitch(_characterModels[_currentCharID]);
+
+            _characterViewProvider = _popUpObject.GetComponent<CharacterViewProvider>();
+
+            _currentCharacterViewModelList = new List<IViewModel>();
+
+            CharacterSwitch(_characterModelProviders[_currentCharID]);
         }
 
-        private void CharacterSwitch(CharacterModel characterModel)
+        private void OnDestroy()
         {
-            if(_characterViewModel != null)
-                _characterViewModel.Dispose();
+            if (_currentCharacterModelProvider != null)
+            {
+                _currentCharacterModelProvider.ModelsSave();
+            }
+        }
 
-            _characterViewModel = new CharacterViewModel(characterModel, _characterInfoView, _playerID);
-            _characterViewModel.OnCloseEvent += OnClose;
+        private void CharacterSwitch(CharacterModelProvider characterModel)
+        {
+            if(_currentCharacterModelProvider != null)
+            {
+                _currentCharacterModelProvider.ModelsSave();
+            }
 
-            _currentCharacterModel = characterModel;
+            _currentCharacterModelProvider = characterModel;
+            _currentCharacterModelProvider.ModelsInit();
+
+            if (_currentCharacterViewModelList != null)
+            {
+                for(Int32 i = 0; i < _currentCharacterViewModelList.Count; i++)
+                {
+                    _currentCharacterViewModelList[i].Dispose();
+                }
+
+                _currentCharacterViewModelList.Clear();
+            }
+
+            CharacterMainInfoViewModel characterMainInfoViewModel = null;
+            CharacterXPViewModel characteXPViewModel = null;
+            CharacterStatsViewModel characterStatsViewModel = null;
+
+
+            if (_currentCharacterModelProvider.GetModelByType<CharacterMainInfoModel>() is CharacterMainInfoModel characterMainInfoModel)
+            {
+                characterMainInfoViewModel = new CharacterMainInfoViewModel(
+                    characterMainInfoModel,
+                    _characterViewProvider.CharacterMainInfoView,
+                    _playerID
+                );
+
+                _currentCharacterViewModelList.Add(characterMainInfoViewModel);
+            }
+
+            CharacterXPModel characterXPModel = _currentCharacterModelProvider.GetModelByType<CharacterXPModel>() as CharacterXPModel;
+            _currentCharacterXPFastLinkDebug = characterXPModel;
+
+            if (characterXPModel != null)
+            {
+                characteXPViewModel = new CharacterXPViewModel(
+                    characterXPModel,
+                    _characterViewProvider.CharacterInfoXPBarView
+                );
+
+                _currentCharacterViewModelList.Add(characteXPViewModel);
+            }
+
+            if (_currentCharacterModelProvider.GetModelByType<CharacterStatsModel>() is CharacterStatsModel characterStatsModel)
+            {
+                characterStatsViewModel = new CharacterStatsViewModel(
+                    characterStatsModel,
+                    _characterViewProvider.CharacterStatsView
+                );
+
+                _currentCharacterViewModelList.Add(characterStatsViewModel);
+            }
+
+            CharacterButtonEventHandler characterButtonEventHandler = new CharacterButtonEventHandler(_characterViewProvider.CharacterButtonsView);
+
+            if(characterMainInfoViewModel == null || characteXPViewModel == null ||
+               characterStatsViewModel == null || characterButtonEventHandler == null)
+            {
+                throw new ArgumentNullException("Проблема при создании ViewModel");
+            }
+
+            characteXPViewModel.LevelUPEvent += characterMainInfoViewModel.OnLevelUP;
+            characteXPViewModel.LevelUPEvent += characterStatsViewModel.OnLevelUP;
+            characterMainInfoViewModel.NeedStatsUpdateEvent += characterStatsViewModel.OnLevelUP;
+
+            characteXPViewModel.CanLevelUP += characterButtonEventHandler.OnCanLevelUP;
+            characteXPViewModel.CanNotLevelUP += characterButtonEventHandler.OnCanNotLevelUP;
+
+            characterButtonEventHandler.OnCloseEvent += OnClose;
+            characterButtonEventHandler.OnLevelUpTryEvent += characteXPViewModel.TryExternLevelUP;
+
+            _currentCharacterModelProvider?.ModelsUpdate();
         }
 
         public void MoveNext()
         {
-            _currentCharID = (_currentCharID + 1) % _characterModels.Count;
-            CharacterSwitch(_characterModels[_currentCharID]);
+            _currentCharID = (_currentCharID + 1) % _characterModelProviders.Count;
+            CharacterSwitch(_characterModelProviders[_currentCharID]);
         }
 
         public void MoveBack()
         {
-            _currentCharID = (_currentCharID - 1 + +_characterModels.Count) % _characterModels.Count;
-            CharacterSwitch(_characterModels[_currentCharID]);
+            _currentCharID = (_currentCharID - 1 + +_characterModelProviders.Count) % _characterModelProviders.Count;
+            CharacterSwitch(_characterModelProviders[_currentCharID]);
         }
 
         private void OnClose()
@@ -73,7 +161,7 @@ namespace PopUp
 
         public void AddXPToCurrentCharacter(Int32 value)
         {
-            _currentCharacterModel.AddXP(value);
+            _currentCharacterXPFastLinkDebug.GainXP(value);
         }
     }
 }

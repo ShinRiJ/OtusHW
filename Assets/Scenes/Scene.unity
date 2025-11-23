@@ -1266,12 +1266,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _playerID: 132
-  _characterInfoViewPrefab: {fileID: 7843055131501607199, guid: 8cf585eca92f2c84bb81ed8009ff9783,
+  _characterListPrefab: {fileID: 7843055131501607199, guid: 8cf585eca92f2c84bb81ed8009ff9783,
     type: 3}
-  _characterModels:
-  - {fileID: 11400000, guid: 6edb0c00344070844b2961ca2e94e164, type: 2}
-  - {fileID: 11400000, guid: caf4f073f25259b429e3539a4dfa77f2, type: 2}
-  - {fileID: 11400000, guid: 358580421e4a4c544abc9a1aadd1d441, type: 2}
+  _characterModelProviders:
+  - {fileID: 11400000, guid: e3c9f3f415079f44187eb825e9a32d9a, type: 2}
+  - {fileID: 11400000, guid: 0096310b350ca024f88bc6b35c584dad, type: 2}
+  - {fileID: 11400000, guid: 6a0bf89542c743f45bc15ab3b9836db5, type: 2}
 --- !u!1 &2068001049
 GameObject:
   m_ObjectHideFlags: 0
